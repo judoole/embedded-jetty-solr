@@ -1,31 +1,54 @@
-apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'war'
 
 group = 'example.jetty'
 version = '1.0-SNAPSHOT'
-
+//mainClassName = "example.jetty.Main"
 description = """"""
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
-
+configurations {
+    executableWarDeps
+}
+sourceSets.main.compileClasspath += configurations.executableWarDeps
 
 repositories {
         
      maven { url "http://repo.maven.apache.org/maven2" }
+     maven { url "http://maven.restlet.org" }
 }
 dependencies {
-    compile group: 'org.apache.solr', name: 'solr', version:'4.6.0'
-    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.5'
-    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version:'1.7.5'
-    compile group: 'org.slf4j', name: 'jul-to-slf4j', version:'1.7.5'
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.5'
-    compile group: 'log4j', name: 'log4j', version:'1.2.17'
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version:'9.1.0.v20131115'
-    compile group: 'org.eclipse.jetty', name: 'jetty-webapp', version:'9.1.0.v20131115'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version:'9.1.0.v20131115'
-    compile group: 'org.eclipse.jetty', name: 'jetty-jsp', version:'9.1.0.v20131115'
-    compile group: 'org.eclipse.jetty', name: 'jetty-security', version:'9.1.0.v20131115'
-    compile group: 'commons-io', name: 'commons-io', version:'1.4'
+    executableWarDeps group: 'org.apache.solr', name: 'solr', version:'4.6.0', ext: 'war'
+    executableWarDeps group: 'org.slf4j', name: 'slf4j-api', version:'1.7.5'
+    executableWarDeps group: 'org.slf4j', name: 'jcl-over-slf4j', version:'1.7.5'
+    executableWarDeps group: 'org.slf4j', name: 'jul-to-slf4j', version:'1.7.5'
+    executableWarDeps group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.7.5'
+    executableWarDeps group: 'log4j', name: 'log4j', version:'1.2.17'
+    executableWarDeps group: 'org.eclipse.jetty', name: 'jetty-server', version:'9.1.0.v20131115'
+    executableWarDeps group: 'org.eclipse.jetty', name: 'jetty-webapp', version:'9.1.0.v20131115'
+    executableWarDeps group: 'org.eclipse.jetty', name: 'jetty-servlet', version:'9.1.0.v20131115'
+    executableWarDeps group: 'org.eclipse.jetty', name: 'jetty-jsp', version:'9.1.0.v20131115'
+    executableWarDeps group: 'org.eclipse.jetty', name: 'jetty-security', version:'9.1.0.v20131115'
+    executableWarDeps group: 'commons-io', name: 'commons-io', version:'1.4'
+}
+
+war <<{
+    from {configurations.executableWarDeps.collect {
+            println it
+            project.zipTree(it)
+        }
+    }
+    from "$buildDir/classes/main"
+    manifest { attributes 'Main-Class': 'example.jetty.Main' }
+    exclude "META-INF/*.SF", "META-INF/*.RSA", "about.html", "about_files/**", "readme.txt", "plugin.properties", "jetty-dir.css"
+}
+
+task runWar(dependsOn: 'war') <<{
+    javaexec{
+        systemProperty 'solr.solr.home', file('solrhome')
+        main="-jar"; args war.archivePath
+    }
+    
 }
