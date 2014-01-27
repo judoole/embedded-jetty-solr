@@ -16,7 +16,6 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 
 public class Main {
-    private static final String CLASS_ONLY_AVAILABLE_IN_IDE = "no.sgfinans.finansfront2.front.FrontConfiguration";
     private static final String PROJECT_RELATIVE_PATH_TO_WEBAPP = "src/main/java/META-INF/webapp";
     private final int port;
     private final String contextPath;
